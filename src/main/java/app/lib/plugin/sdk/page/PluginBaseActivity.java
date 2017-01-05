@@ -1,5 +1,5 @@
 
-package com.chenhao.lib.plugin.sdk.page;
+package app.lib.plugin.sdk.page;
 
 import android.app.Activity;
 import android.content.Context;

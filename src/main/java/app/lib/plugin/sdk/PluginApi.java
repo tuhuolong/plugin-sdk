@@ -1,5 +1,5 @@
 
-package com.chenhao.lib.plugin.sdk;
+package app.lib.plugin.sdk;
 
 import android.app.Application;
 import android.content.Context;

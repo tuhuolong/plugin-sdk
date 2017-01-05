@@ -1,5 +1,5 @@
 
-package com.chenhao.lib.plugin.sdk;
+package app.lib.plugin.sdk;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -10,7 +10,11 @@ import dalvik.system.DexClassLoader;
  * Created by chenhao on 16/12/24.
  */
 
-public class PluginContext {
+public class PluginLoadedInfo {
+
+    private String mPackagePath;
+
+    // public PackageRawInfo packageRawInfo;
     private DexClassLoader mClassLoader;
 
     private AssetManager mAssetManager;
@@ -19,12 +23,18 @@ public class PluginContext {
 
     private IMessageReceiver mMessageReceiver;
 
-    public PluginContext(DexClassLoader loader, AssetManager assetManager, Resources resources,
-            IMessageReceiver messageReceiver) {
-        mClassLoader = loader;
-        mAssetManager = assetManager;
-        mResources = resources;
-        mMessageReceiver = messageReceiver;
+    public PluginLoadedInfo(String path, DexClassLoader loader, AssetManager assetManager,
+            Resources resources, IMessageReceiver messageReceiver) {
+        this.mPackagePath = path;
+        // this.packageRawInfo = packageRawInfo;
+        this.mClassLoader = loader;
+        this.mAssetManager = assetManager;
+        this.mResources = resources;
+        this.mMessageReceiver = messageReceiver;
+    }
+
+    public synchronized String getPackagePath() {
+        return mPackagePath;
     }
 
     public synchronized DexClassLoader getClassLoader() {
@@ -42,4 +52,5 @@ public class PluginContext {
     public synchronized IMessageReceiver getMessageReceiver() {
         return mMessageReceiver;
     }
+
 }

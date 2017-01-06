@@ -7,15 +7,15 @@ import android.content.Context;
 /**
  * Created by chenhao on 16/12/24.
  */
-public abstract class PluginApi {
+public abstract class PluginHostApi {
 
-    private static PluginApi sInstance = null;
+    private static PluginHostApi sInstance = null;
 
-    protected PluginApi() {
+    protected PluginHostApi() {
         sInstance = this;
     }
 
-    public static PluginApi getInstance() {
+    public static PluginHostApi getInstance() {
         return sInstance;
     }
 

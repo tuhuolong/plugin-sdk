@@ -11,13 +11,8 @@ import android.os.Bundle;
 public interface IMessageReceiver {
 
     /**
-     * ApiLevel:1
-     */
-    public static final int MSG_LAUNCH = 1;
-
-    /**
      * 所有插件必须实现该接口 ApiLevel:1
      */
-    public boolean handleMessage(Context context, PluginLoadedInfo xmPluginPackage, int msgType,
+    public boolean handleMessage(Context context, PluginContext pluginContext, int msgType,
             Bundle param);
 }

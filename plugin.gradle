@@ -83,7 +83,7 @@ task runPlugin() << {
         project.exec {
             commandLine adbCmd,
                     "shell",
-                    "am broadcast -a app.lib.plugin.action.OPEN_API --es type plugin_debug --es sub_type debug_package --es file ${outSdcardDebugFile}"
+                    "am broadcast -a app.lib.plugin.action.OPEN_API --es type plugin_debug --es sub_type debug_package --es apk_path ${outSdcardDebugFile}"
         }
 
     } else {

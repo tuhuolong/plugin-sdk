@@ -29,3 +29,31 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.2.1'
     testCompile 'junit:junit:4.12'
 }
+
+
+def jarName = 'plugin-sdk.jar'
+task clearJar(type: Delete) {
+    println("---------clearJar---------");
+
+    delete "${project.buildDir}/../libs_ex/" + jarName
+}
+
+task copyJar(type: Copy) {
+    println("---------copyJar---------");
+
+    from("${project.buildDir}/intermediates/bundles/release/")
+    into("${project.buildDir}/../libs_ex/")
+    include('classes.jar')
+    rename('classes.jar', jarName)
+}
+
+//project.afterEvaluate {
+//    copyJar.dependsOn(clearJar, assembleRelease)
+//}
+
+gradle.buildFinished {
+    clearJar.execute();
+    copyJar.execute();
+
+//    copyJar.dependsOn(clearJar, assembleRelease)
+}

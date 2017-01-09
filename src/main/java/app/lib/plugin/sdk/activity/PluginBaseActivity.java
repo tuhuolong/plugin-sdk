@@ -1,5 +1,5 @@
 
-package app.lib.plugin.sdk.page;
+package app.lib.plugin.sdk.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -8,9 +8,7 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -25,33 +23,23 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
+import app.lib.plugin.sdk.PluginContext;
+
 public class PluginBaseActivity extends FragmentActivity {
     private static final String TAG = "PluginBaseActivity";
 
     public static String FINISH_TAG = "plugin_finish";
     public static String LAST_FINISH_ACTIVITY = "plugin_last_finish_activity";
     public static int START_ACTIVITY_TAG = 10000;
-    // 弱引用XmPluginBaseActivity对象，推荐使用该机制
-    public Handler mHandler;
 
-    // 当前插件package信息
-    // protected XmPluginPackage mPluginPackage;
-    // protected IXmPluginHostActivity mHostActivity;
+    // 插件上下文
+    private PluginContext mPluginContext;
     // 宿主Activity
-    protected FragmentActivity mMainActivity;
-
-    /**
-     * 如果需要用到mHandler发送消息，需要子类重载该函数
-     *
-     * @param msg
-     */
-    public void handleMessage(Message msg) {
-
-    }
+    private FragmentActivity mHostActivity;
 
     // 判断是否是由宿主activity调用
     boolean isLocalLaunch() {
-        return mMainActivity == null;
+        return mHostActivity == null;
     }
 
     // 获取宿主activity，提供Context环境，用于获取资源，获取service服务，创建Dialog等
@@ -59,20 +47,25 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return this;
         } else {
-            return mMainActivity;
+            return mHostActivity;
         }
     }
 
-    // @Override
-    // // 在宿主activity中创建完成后，调用attach，传递宿主信息
-    // public void attach(IXmPluginHostActivity xmPluginHostActivity, XmPluginPackage pluginPackage)
-    // {
-    // mHostActivity = xmPluginHostActivity;
-    // mMainActivity = xmPluginHostActivity.activity();
-    // mPluginPackage = pluginPackage;
-    //
-    // attachBaseContext(mMainActivity);
-    // }
+    // 在宿主activity中创建完成后，调用attach，传递宿主信息
+    public void attach(FragmentActivity hostActivity, PluginContext pluginContext) {
+        mHostActivity = hostActivity;
+        mPluginContext = pluginContext;
+
+        attachBaseContext(mHostActivity);
+    }
+
+    public Activity getHostActivity() {
+        return mHostActivity;
+    }
+
+    public PluginContext getPluginContext() {
+        return mPluginContext;
+    }
 
     /**
      * 按照调用栈一直回退finish，直到lastActivityClass为止,当lastActivityClass为null会一直回退到设备列表
@@ -93,7 +86,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             super.setContentView(view);
         } else {
-            mMainActivity.setContentView(view);
+            mHostActivity.setContentView(view);
         }
     }
 
@@ -102,7 +95,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             super.setContentView(view, params);
         } else {
-            mMainActivity.setContentView(view, params);
+            mHostActivity.setContentView(view, params);
         }
     }
 
@@ -111,7 +104,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             super.setContentView(layoutResID);
         } else {
-            mMainActivity.setContentView(layoutResID);
+            mHostActivity.setContentView(layoutResID);
         }
     }
 
@@ -120,7 +113,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             super.addContentView(view, params);
         } else {
-            mMainActivity.addContentView(view, params);
+            mHostActivity.addContentView(view, params);
         }
     }
 
@@ -129,7 +122,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getMainLooper();
         } else {
-            return mMainActivity.getMainLooper();
+            return mHostActivity.getMainLooper();
         }
     }
 
@@ -138,7 +131,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.findViewById(id);
         } else {
-            return mMainActivity.findViewById(id);
+            return mHostActivity.findViewById(id);
         }
     }
 
@@ -147,7 +140,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getIntent();
         } else {
-            return mMainActivity.getIntent();
+            return mHostActivity.getIntent();
         }
     }
 
@@ -156,7 +149,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             super.setIntent(newIntent);
         } else {
-            mMainActivity.setIntent(newIntent);
+            mHostActivity.setIntent(newIntent);
         }
     }
 
@@ -165,7 +158,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getClassLoader();
         } else {
-            return mMainActivity.getClassLoader();
+            return mHostActivity.getClassLoader();
         }
     }
 
@@ -174,7 +167,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getResources();
         } else {
-            return mMainActivity.getResources();
+            return mHostActivity.getResources();
         }
     }
 
@@ -183,7 +176,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getAssets();
         } else {
-            return mMainActivity.getAssets();
+            return mHostActivity.getAssets();
         }
     }
 
@@ -192,7 +185,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getMenuInflater();
         } else {
-            return mMainActivity.getMenuInflater();
+            return mHostActivity.getMenuInflater();
         }
     }
 
@@ -204,7 +197,7 @@ public class PluginBaseActivity extends FragmentActivity {
     // if (mPluginPackage != null)
     // return mPluginPackage.packageRawInfo.mPackageName;
     // else
-    // return mMainActivity.getPackageName();
+    // return mHostActivity.getPackageName();
     // }
     // }
     //
@@ -222,7 +215,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getSharedPreferences(name, mode);
         } else {
-            return mMainActivity.getSharedPreferences(name, mode);
+            return mHostActivity.getSharedPreferences(name, mode);
         }
     }
 
@@ -231,7 +224,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getApplicationContext();
         } else {
-            return mMainActivity.getApplicationContext();
+            return mHostActivity.getApplicationContext();
         }
     }
 
@@ -240,7 +233,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getWindowManager();
         } else {
-            return mMainActivity.getWindowManager();
+            return mHostActivity.getWindowManager();
         }
     }
 
@@ -249,7 +242,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getWindow();
         } else {
-            return mMainActivity.getWindow();
+            return mHostActivity.getWindow();
         }
     }
 
@@ -258,7 +251,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getSystemService(name);
         } else {
-            return mMainActivity.getSystemService(name);
+            return mHostActivity.getSystemService(name);
         }
     }
 
@@ -267,7 +260,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             super.finish();
         } else {
-            mMainActivity.finish();
+            mHostActivity.finish();
         }
     }
 
@@ -276,7 +269,6 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             super.onCreate(savedInstanceState);
         }
-        // mHandler = new ActivityHandler(this);
     }
 
     @Override
@@ -295,9 +287,9 @@ public class PluginBaseActivity extends FragmentActivity {
         }
         if (data != null) {
             boolean isFinish = data.getBooleanExtra(FINISH_TAG, false);
-            String activitName = this.getClass().getName();
+            String activityName = this.getClass().getName();
             String lastActivity = data.getStringExtra(LAST_FINISH_ACTIVITY);
-            if (isFinish && !activitName.equals(lastActivity)) {
+            if (isFinish && !activityName.equals(lastActivity)) {
                 finishParent(lastActivity);
             }
         }
@@ -466,7 +458,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             super.startActivityForResult(intent, requestCode, options);
         } else {
-            mMainActivity.startActivityForResult(intent, requestCode, options);
+            mHostActivity.startActivityForResult(intent, requestCode, options);
         }
 
     }
@@ -476,7 +468,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getSupportFragmentManager();
         } else {
-            return mMainActivity.getSupportFragmentManager();
+            return mHostActivity.getSupportFragmentManager();
         }
     }
 
@@ -489,25 +481,23 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getSupportLoaderManager();
         } else {
-            return mMainActivity.getSupportLoaderManager();
+            return mHostActivity.getSupportLoaderManager();
         }
     }
 
-    // ////////////////////// ////////////////////// //////////////////////
-    // ApiLevel:2
-    public void setResult0(int resultCode) {
+    public void setResultV0(int resultCode) {
         if (isLocalLaunch()) {
             super.setResult(resultCode);
         } else {
-            mMainActivity.setResult(resultCode);
+            mHostActivity.setResult(resultCode);
         }
     }
 
-    public void setResult0(int resultCode, Intent data) {
+    public void setResultV0(int resultCode, Intent data) {
         if (isLocalLaunch()) {
             super.setResult(resultCode, data);
         } else {
-            mMainActivity.setResult(resultCode, data);
+            mHostActivity.setResult(resultCode, data);
         }
     }
 
@@ -515,24 +505,16 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.isFinishing();
         } else {
-            return mMainActivity.isFinishing();
+            return mHostActivity.isFinishing();
         }
     }
-
-    // public IXmPluginHostActivity hostActivity() {
-    // return mHostActivity;
-    // }
-    //
-    // public XmPluginPackage pluginPackage() {
-    // return mPluginPackage;
-    // }
 
     @Override
     public boolean isChangingConfigurations() {
         if (isLocalLaunch()) {
             return super.isChangingConfigurations();
         } else {
-            return mMainActivity.isChangingConfigurations();
+            return mHostActivity.isChangingConfigurations();
         }
     }
 
@@ -541,7 +523,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getRequestedOrientation();
         } else {
-            return mMainActivity.getRequestedOrientation();
+            return mHostActivity.getRequestedOrientation();
         }
     }
 
@@ -550,7 +532,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             super.setRequestedOrientation(requestedOrientation);
         } else {
-            mMainActivity.setRequestedOrientation(requestedOrientation);
+            mHostActivity.setRequestedOrientation(requestedOrientation);
         }
 
     }
@@ -560,7 +542,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getTaskId();
         } else {
-            return mMainActivity.getTaskId();
+            return mHostActivity.getTaskId();
         }
     }
 
@@ -569,7 +551,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.isTaskRoot();
         } else {
-            return mMainActivity.isTaskRoot();
+            return mHostActivity.isTaskRoot();
         }
     }
 
@@ -578,7 +560,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getPreferences(mode);
         } else {
-            return mMainActivity.getPreferences(mode);
+            return mHostActivity.getPreferences(mode);
         }
     }
 
@@ -587,7 +569,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getLoaderManager();
         } else {
-            return mMainActivity.getLoaderManager();
+            return mHostActivity.getLoaderManager();
         }
     }
 
@@ -596,7 +578,7 @@ public class PluginBaseActivity extends FragmentActivity {
         if (isLocalLaunch()) {
             return super.getCurrentFocus();
         } else {
-            return mMainActivity.getCurrentFocus();
+            return mHostActivity.getCurrentFocus();
         }
     }
 
@@ -620,24 +602,5 @@ public class PluginBaseActivity extends FragmentActivity {
             super.onUserLeaveHint();
         }
     }
-
-    // private static class ActivityHandler extends Handler {
-    //
-    // WeakReference<XmPluginBaseActivity> mRefActivity;
-    //
-    // private ActivityHandler(XmPluginBaseActivity activity) {
-    // mRefActivity = new WeakReference<XmPluginBaseActivity>(activity);
-    // }
-    //
-    // @Override
-    // public void handleMessage(Message msg) {
-    // if (mRefActivity != null) {
-    // XmPluginBaseActivity activity = mRefActivity.get();
-    // if (activity != null && !activity.isFinishing()) {
-    // activity.handleMessage(msg);
-    // }
-    // }
-    // }
-    // }
 
 }

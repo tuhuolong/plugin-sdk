@@ -11,6 +11,10 @@ import dalvik.system.DexClassLoader;
  */
 
 public class PluginContext {
+    private String mPluginId;
+
+    private int mVersionCode;
+
     private DexClassLoader mClassLoader;
 
     private AssetManager mAssetManager;
@@ -19,8 +23,10 @@ public class PluginContext {
 
     private IMessageReceiver mMessageReceiver;
 
-    public PluginContext(DexClassLoader loader, AssetManager assetManager, Resources resources,
-            IMessageReceiver messageReceiver) {
+    public PluginContext(String pluginId, int versionCode, DexClassLoader loader,
+            AssetManager assetManager, Resources resources, IMessageReceiver messageReceiver) {
+        mPluginId = pluginId;
+        mVersionCode = versionCode;
         mClassLoader = loader;
         mAssetManager = assetManager;
         mResources = resources;
@@ -41,5 +47,21 @@ public class PluginContext {
 
     public synchronized IMessageReceiver getMessageReceiver() {
         return mMessageReceiver;
+    }
+
+    public synchronized String getPluginId() {
+        return mPluginId;
+    }
+
+    public synchronized void setPluginId(String pluginId) {
+        mPluginId = pluginId;
+    }
+
+    public synchronized int getVersionCode() {
+        return mVersionCode;
+    }
+
+    public synchronized void setVersionCode(int versionCode) {
+        mVersionCode = versionCode;
     }
 }

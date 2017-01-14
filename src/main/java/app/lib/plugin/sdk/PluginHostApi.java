@@ -57,4 +57,6 @@ public abstract class PluginHostApi {
     public abstract void startActivityForResult(Context context, PluginContext pluginContext,
             Class<? extends PluginBaseActivity> activityClass, Intent intent, int requestCode);
 
+    public abstract void loadLibrary(PluginContext pluginContext, String libName);
+
 }
